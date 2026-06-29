@@ -1,0 +1,12 @@
+tests:
+  - name: pipeline_failure_answer_mentions_schema_drift
+    output: "Issue type: data_pipeline. Answer: Pipeline failures are often caused by schema drift, freshness delays, or broken dependencies."
+    expected_contains:
+      - pipeline
+      - schema drift
+      - freshness
+
+  - name: answer_mentions_dependencies
+    output: "Issue type: data_pipeline. Answer: Pipeline failures are often caused by schema drift, freshness delays, or broken dependencies."
+    expected_contains:
+      - dependencies
