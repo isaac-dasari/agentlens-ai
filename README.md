@@ -23,9 +23,10 @@ This first version includes:
 
 - Python decorators for tracing agents and tools
 - Local SQLite trace store
-- CLI for initialization, run listing, text reporting, and HTML reporting
+- CLI for initialization, run listing, run timeline, text reporting, and HTML reporting
+- Basic trace payload controls with redaction and capture settings
 - YAML-based regression eval runner
-- Example tool-using agent
+- Example tool-using agents
 - Pytest test suite
 - GitHub Actions CI
 
@@ -71,11 +72,26 @@ def run_agent(question: str):
 run_agent("Why did my data pipeline fail?")
 ```
 
+## Payload controls
+
+```python
+from agentlens_ai import TracePrivacyConfig, trace_agent
+
+privacy = TracePrivacyConfig(capture_inputs=False, capture_outputs=False)
+
+@trace_agent(name="support_agent", privacy=privacy)
+def run_agent(question: str):
+    return "answer"
+```
+
+By default, AgentLens redacts common private keys, truncates long values, and stores traces locally.
+
 ## CLI
 
 ```bash
 agentlens init
 agentlens list-runs
+agentlens show <run_id>
 agentlens report
 agentlens report --html
 agentlens report --html --output .agentlens/reports/demo.html
@@ -117,7 +133,6 @@ AgentLens AI is for engineers who build, test, operate, or review AI agents and 
 - Trace export to OpenTelemetry
 - GitHub PR regression comment
 - Agent run comparison
-- Privacy controls for trace payloads
 
 ## Design principles
 
