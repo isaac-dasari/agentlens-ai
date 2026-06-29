@@ -50,6 +50,38 @@ def list_runs() -> None:
 
 
 @app.command()
+def show(run_id: str) -> None:
+    """Show the ordered event timeline for one run."""
+
+    store = SQLiteTraceStore()
+    events = store.fetch_events(run_id=run_id)
+
+    if not events:
+        console.print(f"No events found for run id: {run_id}")
+        raise typer.Exit(code=1)
+
+    table = Table(title=f"AgentLens Timeline: {run_id}")
+    table.add_column("Time")
+    table.add_column("Event")
+    table.add_column("Name")
+    table.add_column("Duration")
+    table.add_column("Status")
+
+    for event in events:
+        duration = "-" if event.get("duration_ms") is None else f"{event['duration_ms']:.2f} ms"
+        status = "error" if event.get("error") else "ok"
+        table.add_row(
+            str(event.get("timestamp", "")),
+            str(event.get("event_type", "")),
+            str(event.get("name", "")),
+            duration,
+            status,
+        )
+
+    console.print(table)
+
+
+@app.command()
 def report(
     html: bool = typer.Option(False, "--html", help="Generate a local HTML report."),
     output: Path = typer.Option(DEFAULT_REPORT_PATH, "--output", "-o", help="HTML report path."),
