@@ -9,6 +9,7 @@ from rich.console import Console
 from rich.table import Table
 
 from agentlens_ai.evals.runner import run_static_eval_file
+from agentlens_ai.reporting.html import DEFAULT_REPORT_PATH, generate_html_report
 from agentlens_ai.reporting.summary import summarize_events
 from agentlens_ai.storage.sqlite_store import SQLiteTraceStore
 
@@ -49,7 +50,10 @@ def list_runs() -> None:
 
 
 @app.command()
-def report() -> None:
+def report(
+    html: bool = typer.Option(False, "--html", help="Generate a local HTML report."),
+    output: Path = typer.Option(DEFAULT_REPORT_PATH, "--output", "-o", help="HTML report path."),
+) -> None:
     """Show a basic local trace report."""
 
     store = SQLiteTraceStore()
@@ -63,6 +67,10 @@ def report() -> None:
     console.print(f"Tool calls: {summary['tool_calls']}")
     console.print(f"Agent runs: {summary['agent_runs']}")
     console.print(f"Avg recorded duration: {summary['avg_duration_ms']} ms")
+
+    if html:
+        report_path = generate_html_report(events, output)
+        console.print(f"[green]HTML report written to {report_path}[/green]")
 
 
 @app.command()
