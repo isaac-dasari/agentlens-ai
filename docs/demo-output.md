@@ -31,6 +31,16 @@ Agent runs: 1
 Avg recorded duration: 1.0 ms
 ```
 
+## Run timeline output
+
+After copying a run id from `agentlens list-runs`:
+
+```bash
+agentlens show run_example
+```
+
+The command prints an ordered timeline with timestamp, event type, function name, duration, and status.
+
 ## HTML report output
 
 ```text
@@ -54,6 +64,7 @@ The MVP proves the basic loop:
 1. Trace an agent run
 2. Persist events locally
 3. Show a local text report
-4. Generate a local HTML report
-5. Run regression checks
-6. Fail CI when an eval fails
+4. Inspect one run timeline
+5. Generate a local HTML report
+6. Run regression checks
+7. Fail CI when an eval fails
