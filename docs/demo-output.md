@@ -9,6 +9,7 @@ agentlens init
 python examples/simple_tool_agent/agent.py
 agentlens list-runs
 agentlens report
+agentlens report --html
 agentlens eval examples/simple_tool_agent/evals.yml
 ```
 
@@ -30,6 +31,14 @@ Agent runs: 1
 Avg recorded duration: 1.0 ms
 ```
 
+## HTML report output
+
+```text
+HTML report written to .agentlens/reports/latest.html
+```
+
+The generated HTML report includes summary cards and an event timeline with run id, timestamp, event type, function name, duration, and status.
+
 ## Eval output
 
 ```text
@@ -44,6 +53,7 @@ The MVP proves the basic loop:
 
 1. Trace an agent run
 2. Persist events locally
-3. Show a local report
-4. Run regression checks
-5. Fail CI when an eval fails
+3. Show a local text report
+4. Generate a local HTML report
+5. Run regression checks
+6. Fail CI when an eval fails
