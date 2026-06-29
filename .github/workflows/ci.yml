@@ -31,5 +31,13 @@ jobs:
       - name: Run tests
         run: pytest
 
-      - name: Run demo eval
-        run: agentlens eval examples/simple_tool_agent/evals.yml
+      - name: Run demo workflow
+        run: |
+          agentlens init
+          python examples/simple_tool_agent/agent.py
+          RUN_ID=$(agentlens list-runs | grep -o 'run_[a-f0-9]*' | head -n 1)
+          agentlens report
+          agentlens report --html
+          test -f .agentlens/reports/latest.html
+          agentlens show "$RUN_ID"
+          agentlens eval examples/simple_tool_agent/evals.yml
