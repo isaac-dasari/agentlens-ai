@@ -23,7 +23,7 @@ This first version includes:
 
 - Python decorators for tracing agents and tools
 - Local SQLite trace store
-- CLI for initialization, run listing, and reporting
+- CLI for initialization, run listing, text reporting, and HTML reporting
 - YAML-based regression eval runner
 - Example tool-using agent
 - Pytest test suite
@@ -44,7 +44,14 @@ agentlens init
 python examples/simple_tool_agent/agent.py
 agentlens list-runs
 agentlens report
+agentlens report --html
 agentlens eval examples/simple_tool_agent/evals.yml
+```
+
+The HTML report is written to:
+
+```text
+.agentlens/reports/latest.html
 ```
 
 ## Python SDK
@@ -70,6 +77,8 @@ run_agent("Why did my data pipeline fail?")
 agentlens init
 agentlens list-runs
 agentlens report
+agentlens report --html
+agentlens report --html --output .agentlens/reports/demo.html
 agentlens eval examples/simple_tool_agent/evals.yml
 ```
 
@@ -78,11 +87,22 @@ agentlens eval examples/simple_tool_agent/evals.yml
 ```text
 AgentLens Report
 Total runs: 1
-Total events: 4
+Total events: 6
 Errors: 0
-Tool calls: 1
+Tool calls: 2
 Agent runs: 1
+Avg recorded duration: 1.0 ms
+HTML report written to .agentlens/reports/latest.html
 ```
+
+## What the HTML report shows
+
+- Run count
+- Event count
+- Error count
+- Tool call count
+- Average recorded duration
+- Ordered event timeline with run id, timestamp, event type, name, duration, and status
 
 ## Who this is for
 
@@ -93,11 +113,11 @@ AgentLens AI is for engineers who build, test, operate, or review AI agents and 
 - OpenAI API wrapper
 - LangChain callback integration
 - LangGraph example
-- HTML report
 - Cost and token tracking
 - Trace export to OpenTelemetry
 - GitHub PR regression comment
 - Agent run comparison
+- Privacy controls for trace payloads
 
 ## Design principles
 
