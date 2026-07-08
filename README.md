@@ -26,7 +26,8 @@ This first version includes:
 - CLI for initialization, run listing, run timeline, text reporting, and HTML reporting
 - Basic trace payload controls with redaction and capture settings
 - YAML-based regression eval runner
-- Example tool-using agents
+- Simple tool-agent example
+- LangGraph-style graph workflow example
 - Pytest test suite
 - GitHub Actions CI
 
@@ -54,6 +55,18 @@ The HTML report is written to:
 ```text
 .agentlens/reports/latest.html
 ```
+
+## LangGraph-style demo
+
+```bash
+agentlens init
+python examples/langgraph_agent/agent.py
+agentlens list-runs
+agentlens report --html
+agentlens eval examples/langgraph_agent/evals.yml
+```
+
+This example traces a graph-shaped workflow with route, retrieve, and compose nodes.
 
 ## Python SDK
 
@@ -128,7 +141,6 @@ AgentLens AI is for engineers who build, test, operate, or review AI agents and 
 
 - OpenAI API wrapper
 - LangChain callback integration
-- LangGraph example
 - Cost and token tracking
 - Trace export to OpenTelemetry
 - GitHub PR regression comment
