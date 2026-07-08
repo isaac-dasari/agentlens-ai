@@ -1,0 +1,14 @@
+tests:
+  - name: langgraph_style_pipeline_route
+    output: "Route: pipeline_debug. Recommendation: Check schema drift, freshness, dependencies, and recent deployment changes."
+    expected_contains:
+      - pipeline_debug
+      - schema drift
+      - freshness
+      - dependencies
+
+  - name: langgraph_style_deployment_context
+    output: "Route: pipeline_debug. Recommendation: Check schema drift, freshness, dependencies, and recent deployment changes."
+    expected_contains:
+      - deployment
+      - Recommendation
