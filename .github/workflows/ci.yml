@@ -31,7 +31,7 @@ jobs:
       - name: Run tests
         run: pytest
 
-      - name: Run demo workflow
+      - name: Run simple agent demo workflow
         run: |
           agentlens init
           python examples/simple_tool_agent/agent.py
@@ -41,3 +41,10 @@ jobs:
           test -f .agentlens/reports/latest.html
           agentlens show "$RUN_ID"
           agentlens eval examples/simple_tool_agent/evals.yml
+
+      - name: Run LangGraph-style demo workflow
+        run: |
+          python examples/langgraph_agent/agent.py
+          agentlens report --html --output .agentlens/reports/langgraph.html
+          test -f .agentlens/reports/langgraph.html
+          agentlens eval examples/langgraph_agent/evals.yml
