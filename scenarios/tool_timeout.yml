@@ -1,0 +1,17 @@
+name: tool_timeout_customer_support
+task: "Run the support agent while the document search tool intermittently times out."
+
+faults:
+  - target: "search_docs"
+    type: "timeout"
+    probability: 1.0
+    latency_ms: 8000
+
+expected:
+  should:
+    - "surface tool timeout as a visible failure"
+    - "avoid silently producing an unsupported answer"
+
+thresholds:
+  pass_rate: 0.0
+  max_p95_latency_ms: 12000
