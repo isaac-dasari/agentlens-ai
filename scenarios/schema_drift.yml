@@ -1,0 +1,15 @@
+name: schema_drift_customer_support
+task: "Run the support agent while a tool returns an unexpected response shape."
+
+faults:
+  - target: "search_docs"
+    type: "schema_drift"
+    probability: 1.0
+
+expected:
+  should:
+    - "make schema drift visible in the trace timeline"
+    - "attribute the failure to the tool layer"
+
+thresholds:
+  pass_rate: 0.0
