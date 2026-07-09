@@ -5,8 +5,9 @@ from __future__ import annotations
 import functools
 import time
 from collections.abc import Callable
-from typing import ParamSpec, TypeVar
+from typing import ParamSpec, TypeVar, cast
 
+from agentlens_ai.fault_injection.runtime import maybe_inject_fault
 from agentlens_ai.privacy import TracePrivacyConfig, sanitize_inputs, sanitize_output
 from agentlens_ai.storage.sqlite_store import SQLiteTraceStore
 from agentlens_ai.tracing.context import clear_run_id, get_or_create_run_id
@@ -44,7 +45,22 @@ def trace_tool(
             )
 
             try:
-                result = func(*args, **kwargs)
+                fault = maybe_inject_fault(tool_name)
+                if fault is not None:
+                    trace_store.write_event(
+                        TraceEvent(
+                            run_id=run_id,
+                            event_type=EventType.FAULT_INJECTED,
+                            name=tool_name,
+                            outputs=fault.as_dict(),
+                        )
+                    )
+                    if fault.raises_exception:
+                        fault.raise_exception()
+                    result = fault.replacement_output()
+                else:
+                    result = func(*args, **kwargs)
+
                 duration_ms = (time.perf_counter() - start) * 1000
                 trace_store.write_event(
                     TraceEvent(
@@ -55,7 +71,7 @@ def trace_tool(
                         outputs=sanitize_output(result, privacy_config),
                     )
                 )
-                return result
+                return cast(R, result)
             except Exception as exc:
                 duration_ms = (time.perf_counter() - start) * 1000
                 trace_store.write_event(
