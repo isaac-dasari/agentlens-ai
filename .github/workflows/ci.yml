@@ -42,6 +42,20 @@ jobs:
           agentlens show "$RUN_ID"
           agentlens eval examples/simple_tool_agent/evals.yml
 
+      - name: Run reliability stress workflow
+        run: |
+          agentlens stress examples/simple_tool_agent/agent.py \
+            --scenario scenarios/tool_timeout.yml \
+            --runs 2 \
+            --output .agentlens/stress/baseline.json
+          agentlens stress examples/simple_tool_agent/agent.py \
+            --scenario scenarios/schema_drift.yml \
+            --runs 2 \
+            --output .agentlens/stress/latest.json
+          agentlens compare .agentlens/stress/baseline.json .agentlens/stress/latest.json
+          agentlens export-otel
+          test -f .agentlens/exports/otel-spans.jsonl
+
       - name: Run LangGraph-style demo workflow
         run: |
           python examples/langgraph_agent/agent.py
