@@ -113,7 +113,7 @@ def generate_html_report(
 <body>
   <header>
     <h1>AgentLens Report</h1>
-    <p>Local trace summary for AI agent runs.</p>
+    <p>Local trace summary for AI agent reliability and debugging workflows.</p>
   </header>
   <main>
     <section class="cards">
@@ -121,7 +121,10 @@ def generate_html_report(
       <div class="card"><div class="metric">{summary['events']}</div><div class="label">Events</div></div>
       <div class="card"><div class="metric">{summary['errors']}</div><div class="label">Errors</div></div>
       <div class="card"><div class="metric">{summary['tool_calls']}</div><div class="label">Tool calls</div></div>
+      <div class="card"><div class="metric">{summary['faults_injected']}</div><div class="label">Faults injected</div></div>
       <div class="card"><div class="metric">{summary['avg_duration_ms']}</div><div class="label">Avg duration ms</div></div>
+      <div class="card"><div class="metric">{summary['estimated_tokens']}</div><div class="label">Estimated tokens</div></div>
+      <div class="card"><div class="metric">${summary['estimated_cost_usd']}</div><div class="label">Estimated cost</div></div>
     </section>
 
     <section>
