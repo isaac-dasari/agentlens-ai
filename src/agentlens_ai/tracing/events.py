@@ -14,6 +14,7 @@ class EventType(str, Enum):
     AGENT_END = "agent_end"
     TOOL_START = "tool_start"
     TOOL_END = "tool_end"
+    FAULT_INJECTED = "fault_injected"
     ERROR = "error"
 
 
