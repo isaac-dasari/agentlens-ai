@@ -1,31 +1,39 @@
 # AgentLens AI
 
-Lightweight observability and regression testing for AI agents.
+Local-first reliability testing, observability, and regression checks for AI agents.
 
-AgentLens AI helps developers trace agent runs, tool calls, latency, errors, and behavior changes using a local-first workflow. It is designed for engineers building agents with LangGraph, LangChain, CrewAI, OpenAI tool calling, Bedrock agents, or custom Python frameworks.
+AgentLens AI helps developers trace agent runs, inspect tool calls, inject controlled failures, compare reliability across changes, estimate local token/cost impact, and export trace data for downstream observability workflows.
+
+It is designed for engineers building tool-using agents with LangGraph, LangChain, CrewAI, OpenAI tool calling, Bedrock agents, or custom Python frameworks.
 
 ## Why AgentLens AI?
 
-AI agents fail in ways normal logs do not explain. A single answer may depend on prompts, model calls, tool calls, retries, parsing logic, retrieval results, and hidden state transitions.
+AI agents fail across more than one layer. A single answer can depend on prompts, model calls, tool calls, retries, parsing logic, retrieval results, hidden state transitions, and dependency behavior.
 
 AgentLens AI helps answer:
 
 - What did the agent do?
 - Which tool calls happened?
 - Where did it fail?
-- How long did each step take?
-- Did a code or prompt change break behavior?
+- Did a tool timeout, schema drift, or malformed response change behavior?
+- Did repeated runs stay reliable?
+- Did a code or prompt change increase latency or cost?
 - Can this behavior be checked in CI?
 
 ## Current MVP
 
-This first version includes:
+This version includes:
 
 - Python decorators for tracing agents and tools
 - Local SQLite trace store
 - CLI for initialization, run listing, run timeline, text reporting, and HTML reporting
 - Basic trace payload controls with redaction and capture settings
 - YAML-based regression eval runner
+- YAML-based production-like fault scenarios
+- Tool-level fault injection for timeout, rate limit, dependency error, bad JSON, partial response, and schema drift
+- Repeated-run stress testing with pass rate, reliability score, p95 latency, cost estimate, and failure attribution
+- Baseline-vs-latest stress result comparison
+- OpenTelemetry-style JSONL trace export
 - Simple tool-agent example
 - LangGraph-style graph workflow example
 - Pytest test suite
@@ -55,6 +63,71 @@ The HTML report is written to:
 ```text
 .agentlens/reports/latest.html
 ```
+
+## Reliability stress test
+
+Run the same agent under a controlled tool-timeout scenario:
+
+```bash
+agentlens stress examples/simple_tool_agent/agent.py \
+  --scenario scenarios/tool_timeout.yml \
+  --runs 5 \
+  --output .agentlens/stress/tool-timeout.json
+```
+
+Example output:
+
+```text
+AgentLens Stress Result
+Scenario: tool_timeout_customer_support
+Runs: 5
+Passed runs: 0
+Pass rate: 0.0
+Reliability score: 0.0
+Failure attribution: {'timeout': 5, 'tool_timeout': 5}
+```
+
+A scenario file looks like this:
+
+```yaml
+name: tool_timeout_customer_support
+task: "Run the support agent while the document search tool intermittently times out."
+
+faults:
+  - target: "search_docs"
+    type: "timeout"
+    probability: 1.0
+    latency_ms: 8000
+
+thresholds:
+  pass_rate: 0.0
+  max_p95_latency_ms: 12000
+```
+
+Supported fault types:
+
+- `timeout`
+- `rate_limit`
+- `dependency_error`
+- `bad_json`
+- `partial_response`
+- `schema_drift`
+
+## Compare stress results
+
+```bash
+agentlens compare .agentlens/stress/baseline.json .agentlens/stress/latest.json
+```
+
+The comparison reports pass-rate, reliability-score, latency, and estimated-cost deltas.
+
+## Export traces
+
+```bash
+agentlens export-otel --output .agentlens/exports/otel-spans.jsonl
+```
+
+This writes OpenTelemetry-style JSONL spans without requiring a collector.
 
 ## LangGraph-style demo
 
@@ -107,44 +180,29 @@ agentlens list-runs
 agentlens show <run_id>
 agentlens report
 agentlens report --html
-agentlens report --html --output .agentlens/reports/demo.html
 agentlens eval examples/simple_tool_agent/evals.yml
+agentlens stress examples/simple_tool_agent/agent.py --scenario scenarios/tool_timeout.yml
+agentlens compare .agentlens/stress/baseline.json .agentlens/stress/latest.json
+agentlens export-otel
 ```
-
-## Example report
-
-```text
-AgentLens Report
-Total runs: 1
-Total events: 6
-Errors: 0
-Tool calls: 2
-Agent runs: 1
-Avg recorded duration: 1.0 ms
-HTML report written to .agentlens/reports/latest.html
-```
-
-## What the HTML report shows
-
-- Run count
-- Event count
-- Error count
-- Tool call count
-- Average recorded duration
-- Ordered event timeline with run id, timestamp, event type, name, duration, and status
 
 ## Who this is for
 
-AgentLens AI is for engineers who build, test, operate, or review AI agents and need lightweight local visibility before introducing a heavier production observability stack.
+AgentLens AI is for engineers who build, test, operate, or review AI agents and need local visibility, repeatable reliability checks, and CI-friendly regression signals before introducing a heavier production observability stack.
+
+## What this does not solve
+
+AgentLens AI does not prove that an agent is globally safe or correct. It tests behavior under defined scenarios and makes failure modes visible. The quality of the result depends on scenario design, task oracles, and evaluation policies. It is meant to support engineering review, not replace human judgment.
 
 ## Roadmap
 
-- OpenAI API wrapper
+- Native OpenAI API wrapper
 - LangChain callback integration
-- Cost and token tracking
-- Trace export to OpenTelemetry
+- Richer token accounting from provider metadata
+- OpenTelemetry collector integration
 - GitHub PR regression comment
-- Agent run comparison
+- Agent run comparison by trace timeline
+- Scenario library for common agent failure modes
 
 ## Design principles
 
@@ -152,7 +210,8 @@ AgentLens AI is for engineers who build, test, operate, or review AI agents and 
 - Simple CLI workflow
 - Framework-agnostic core
 - Useful without a hosted service
-- Built for debugging and regression testing, not just dashboards
+- Built for reliability testing and debugging, not just dashboards
+- Clear limitations over inflated claims
 
 ## License
 
